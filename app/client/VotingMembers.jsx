@@ -23,7 +23,7 @@ export const VotingMembers = React.createClass({
       <div className="votingMembers list">
         {this.data.votingMembers.value().map(votingMember => (
           <div className="votingMember" key={votingMember.id}>
-            <p>{votingMember.name}: <span style={{'font-size': 24 + 'px'}}>{votingMember.score}</span></p>
+            <p>{votingMember.name}: <span style={{'fontSize': 24 + 'px'}}>{votingMember.score}</span></p>
           </div>
         ))}
       </div>

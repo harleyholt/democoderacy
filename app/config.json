@@ -1,6 +1,7 @@
 {
   "app": {
-    "port": 8008
+    "port": 8008,
+    "environment": "local"
   },
   "db": {
     "name": "nomicode",

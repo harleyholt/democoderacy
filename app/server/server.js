@@ -5,15 +5,39 @@ import r from 'rethinkdb';
 const RethinkdbWebsocketServer = require('rethinkdb-websocket-server');
 import Promise from 'bluebird';
 
-// Open a connection to the database
-// Note this is a  promise and any callers should use dbConnPromise.then to act on it
-// const dbConnPromise = Promise.promisify(r.connect)(cfg.db);
-
 // Set up a server
 const app = express();
 
 // Serve static assets (including the bundled react code) on the home route
 app.use('/', express.static('app/assets'));
+
+/************************* React Hot Loading *************************/
+import httpProxy from 'http-proxy';
+import bundle from './bundle.js';
+if (cfg.app.environment === 'local') {
+  // We require the bundler inside the if block because
+  // it is only needed in a development environment. Later
+  // you will see why this is a good idea
+
+  bundle();
+  const proxy = httpProxy.createProxyServer();
+
+  // It is important to catch any errors from the proxy or the
+  // server will crash. An example of this is connecting to the
+  // server when webpack is bundling
+  proxy.on('error', function(e) {
+    console.log('Could not connect to proxy, please try again...');
+  });
+
+  // Any requests to localhost:PORT/build is proxied
+  // to webpack-dev-server
+  app.all('/build/*', function (req, res) {
+    proxy.web(req, res, {
+        target: 'http://localhost:8009'
+    });
+  });
+}
+/**********************************************************************/
 
 // The webserver includes both the express app and the Rethink proxy which allows the
 // clients to make queries against the database.
@@ -31,7 +55,5 @@ webserver.listen(cfg.app.port, function() {
   let host = webserver.address().address;
   let port = webserver.address().port;
 
-  console.log('Example app listening at http://%s:%s', host, port);
-  console.log('Edited again');
-  console.log('Once more');
+  console.log('Democoderacy listening at http://%s:%s', host, port);
 });
