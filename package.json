@@ -4,12 +4,15 @@
   "description": "The worlds nerdliest game",
   "main": "app/server/server.js",
   "scripts": {
-    "resetdb": "babel-node database/resetdb.js",
+    "reset-db": "babel-node database/resetdb.js",
+    "setup-db": "./database/setup.sh",
+    "start-db": "./database/start.sh",
+    "stop-db": "./database/stop.sh",
     "postinstall": "webpack",
     "webpack-watcher": "webpack --config webpack.config.js --progress --colors --watch",
     "babel-node": "./node_modules/babel/bin/babel-node.js app/server/server.js",
     "server": "nodemon --watch app/server --exec npm run babel-node",
-    "start": "npm run webpack-watcher & npm run server"
+    "start": "npm run start-db & npm run webpack-watcher & npm run server"
   },
   "keywords": [
     "nomic"
