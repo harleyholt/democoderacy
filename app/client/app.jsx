@@ -9,7 +9,7 @@ RethinkSession.connect({
   host: window.location.hostname,
   port: parseInt(window.location.port),
   path: '/db',
-  db: 'nomicode',
+  db: 'democoderacy',
 });
 
 const mountNode = document.getElementById('app');

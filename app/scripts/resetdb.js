@@ -9,7 +9,7 @@ const connPromise = Promise.promisify(r.connect)({
 });
 const run = q => connPromise.then(c => q.run(c));
 
-console.log('Resetting nomicode db...');
+console.log('Resetting democoderacy db...');
 
 const recreateDb = name => run(r.dbDrop(name))
                            .catch(() => {})
