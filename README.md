@@ -9,6 +9,7 @@ In short, Nomic is a game where every rule is changable. Every turn proposes new
 Democoderacy is the same idea in the form of this GitHub repo. The code in the repo is the game. All of it is changable (even this README), but only if a majority of the contributors agree to the change.
 
 To start, the code implements the following:
+
 1. All contributors start with 1 point and their winner flag set to false.
 1. Any contributor whose point field is greater than or equal to 21 has their winner flag set to true.
 1. The first contributor to have their winner flag set to true is the winner.
