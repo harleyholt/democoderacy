@@ -1,3 +1,5 @@
+import fs from 'fs';
+
 import cfg from '../config';
 import http from 'http';
 import express from 'express';
@@ -36,7 +38,25 @@ if (cfg.app.environment === 'local') {
         target: 'http://localhost:8009'
     });
   });
+
+  // Cleaning up the temporary files created by hot code reloading
+  const _cleanup = function(options={}) {
+    const assets = fs.readdirSync('app/assets');
+    const regex = /.*\.hot-update\.js(\.map)?/;
+    assets.filter(function(asset) {
+      return regex.test(asset);
+    }).map(function(temporaryAsset) {
+      fs.unlinkSync(`app/assets/${temporaryAsset}`);
+    });
+    if (options.exit) {
+      process.exit();
+    }
+  };
+  process.on('exit', _cleanup.bind(null));
+  process.on('SIGINT', _cleanup.bind({exit: true}));
 }
+
+
 /**********************************************************************/
 
 // The webserver includes both the express app and the Rethink proxy which allows the
