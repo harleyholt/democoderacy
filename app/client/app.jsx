@@ -1,7 +1,7 @@
 import React from 'react';
 import Reflux from 'reflux';
 import {Router, Route} from 'react-router';
-import {VotingMembers} from './VotingMembers.jsx';
+import {Home} from './pages/Home.jsx';
 
 console.log('Starting the client side app');
 const ReactRethinkdb = require('react-rethinkdb');
@@ -18,6 +18,6 @@ RethinkSession.connect({
 const mountNode = document.getElementById('app');
 React.render((
   <Router>
-    <Route path="/" component={VotingMembers}/>
+    <Route path="/" component={Home}/>
   </Router>
 ), mountNode);
