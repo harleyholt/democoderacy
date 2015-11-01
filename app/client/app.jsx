@@ -1,4 +1,6 @@
 import React from 'react';
+import Reflux from 'reflux';
+import {Router, Route} from 'react-router';
 import {VotingMembers} from './VotingMembers.jsx';
 
 console.log('Starting the client side app');
@@ -12,5 +14,10 @@ RethinkSession.connect({
   db: 'democoderacy',
 });
 
+
 const mountNode = document.getElementById('app');
-React.render(<VotingMembers />, mountNode);
+React.render((
+  <Router>
+    <Route path="/" component={VotingMembers}/>
+  </Router>
+), mountNode);

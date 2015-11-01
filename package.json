@@ -37,9 +37,12 @@
   "dependencies": {
     "bluebird": "^2.10.2",
     "express": "^4.13.3",
+    "history": "^1.13.0",
     "react": "^0.14.0",
     "react-dom": "^0.14.0",
     "react-rethinkdb": "^0.4.1",
+    "react-router": "^1.0.0-rc3",
+    "reflux": "^0.3.0",
     "rethinkdb": "^2.1.1",
     "rethinkdb-websocket-server": "^0.2.0"
   }
