@@ -55,8 +55,6 @@ if (cfg.app.environment === 'local') {
   process.on('exit', _cleanup.bind(null));
   process.on('SIGINT', _cleanup.bind({exit: true}));
 }
-
-
 /**********************************************************************/
 
 // The webserver includes both the express app and the Rethink proxy which allows the
@@ -76,4 +74,56 @@ webserver.listen(cfg.app.port, function() {
   let port = webserver.address().port;
 
   console.log('Democoderacy listening at http://%s:%s', host, port);
+});
+
+// Implementation of the win condition: when a player hits the target points, set them as the winner
+// TODO: Redo with promises
+const onWinDetected = function(winningMember) {
+  console.info('Winner detected', winningMember);
+};
+
+r.connect({host: cfg.db.host, port: cfg.db.port, db: cfg.db.name}).then(function(c) {
+  // Check if there is already a winner
+  r.table('votingMembers').filter(
+    r.row('winner').eq(true)
+  ).run(c, function(err, cursor) {
+    if (err) {
+      return console.error('Could not determine if there is already a winner on start up');
+    }
+    cursor.toArray(function(err, results) {
+      if (err) {
+        return console.error('Could not determine if there is already a winner on start up');
+      }
+      if (results.length) {
+        console.info('There is already a winner, not watching for another');
+      } else {
+        r.table('votingMembers').filter(
+          r.row('score').ge(cfg.game.winningPoints)
+        ).run(c, function(err, cursor) {
+          if (err) {
+            return console.error('Could not determine if there is already a winner on start up');
+          }
+          cursor.toArray(function(err, results) {
+            if (err) {
+              return console.error('Could not determine if there is already a winner on start up');
+            }
+            if (results.length) {
+              onWinDetected(results[0]);
+            } else {
+              // Nobody has won yet, start watching for changes
+              // TODO
+              r.table('votingMembers').filter(r.row('score').ge(cfg.game.winningPoints)).changes().run(c).then(function(cursor){
+                console.log('Listening for changes to votingMembers');
+                cursor.each(function(err, votingMember) {
+                  onWinDetected(winningMember);
+                });
+              });
+            }
+          });
+        });
+      }
+    });
+
+  });
+
 });
