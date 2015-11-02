@@ -53,7 +53,7 @@ if (cfg.app.environment === 'local') {
     }
   };
   process.on('exit', _cleanup.bind(null));
-  process.on('SIGINT', _cleanup.bind({exit: true}));
+  process.on('SIGINT', _cleanup.bind(null, {exit: true}));
 }
 /**********************************************************************/
 
