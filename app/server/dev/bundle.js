@@ -1,14 +1,11 @@
 import Webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
-import webpackConfig from './../../webpack.config.js';
-import path from 'path';
-import fs from 'fs';
-const mainPath = path.resolve(__dirname, '..', 'app', 'main.js');
+import webpackConfig from './../../../webpack.config.js';
 
 // Modified from code outlined in:
 // http://www.christianalfoni.com/articles/2015_04_19_The-ultimate-webpack-setup
 
-module.exports = function () {
+module.exports = function (host, port) {
 
   // First we fire up Webpack an pass in the configuration we
   // created
@@ -48,7 +45,7 @@ module.exports = function () {
 
   // We fire up the development server and give notice in the terminal
   // that we are starting the initial bundle
-  bundler.listen(8009, 'localhost', function () {
+  bundler.listen(port, host, function () {
     console.log('Bundling project, please wait...');
   });
 

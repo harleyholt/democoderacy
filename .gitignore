@@ -3,6 +3,5 @@ app/assets/bundle.js.map
 app/assets/*.hot-update.js
 app/assets/*.hot-update.js.map
 app/assets/*.hot-update.json
-app/server/bundle.js
 node_modules
 npm-debug.log

@@ -14,46 +14,9 @@ const app = express();
 app.use('/', express.static('app/assets'));
 
 /************************* React Hot Loading *************************/
-import httpProxy from 'http-proxy';
-import bundle from './bundle.js';
-if (cfg.app.environment === 'local') {
-  // We require the bundler inside the if block because
-  // it is only needed in a development environment. Later
-  // you will see why this is a good idea
-
-  bundle();
-  const proxy = httpProxy.createProxyServer();
-
-  // It is important to catch any errors from the proxy or the
-  // server will crash. An example of this is connecting to the
-  // server when webpack is bundling
-  proxy.on('error', function(e) {
-    console.log('Could not connect to proxy, please try again...');
-  });
-
-  // Any requests to localhost:PORT/build is proxied
-  // to webpack-dev-server
-  app.all('/build/*', function (req, res) {
-    proxy.web(req, res, {
-        target: 'http://localhost:8009'
-    });
-  });
-
-  // Cleaning up the temporary files created by hot code reloading
-  const _cleanup = function(options={}) {
-    const assets = fs.readdirSync('app/assets');
-    const regex = /.*\.hot-update\.js(\.map)?/;
-    assets.filter(function(asset) {
-      return regex.test(asset);
-    }).map(function(temporaryAsset) {
-      fs.unlinkSync(`app/assets/${temporaryAsset}`);
-    });
-    if (options.exit) {
-      process.exit();
-    }
-  };
-  process.on('exit', _cleanup.bind(null));
-  process.on('SIGINT', _cleanup.bind(null, {exit: true}));
+if (cfg.app.hotReload) {
+  const hotReload = require('./dev/hotReload');
+  hotReload(app, cfg.app.hotReload.host, cfg.app.hotReload.port);
 }
 /**********************************************************************/
 
@@ -77,53 +40,44 @@ webserver.listen(cfg.app.port, function() {
 });
 
 // Implementation of the win condition: when a player hits the target points, set them as the winner
-// TODO: Redo with promises
+// Implemented by using the rethinkdb changefeed functionality
+
+// Before watching for a winner, make sure the game isn't over already
+r.connect({host: cfg.db.host, port: cfg.db.port, db: cfg.db.name}).then(function(c) {
+  return r.table('votingMembers').filter(r.row('winner').eq(true)).run(c)
+    .then(function(cursor) {
+      return cursor.toArray();
+    })
+    .then(function(winners) {
+      if (winners.length) {
+        console.info('There is already a winner, not watching for another');
+      } else {
+        // No winners yet, start monitoring for winners
+        detectWinner(c);
+      }
+    })
+    .error(function(err) {
+      console.warn('Could not detect if there was a winner or listen for the winner. Might want to fix this.', err);
+    });
+});
+
+// Called to start observing for a winner
+const detectWinner = function(dbConn) {
+  r.table('votingMembers').orderBy({index: 'joinedAt'}).filter(r.row('score').ge(cfg.game.winningPoints)).limit(1).changes().run(dbConn)
+    .then(function(cursor) {
+      console.info('Listening for changes to votingMembers');
+      cursor.each(function(err, update){
+        if (err) {
+          console.error('There was an error while listening for the winner', err);
+        }
+        if (update.new_val) {
+          onWinDetected(update.new_val);
+        }
+      });
+    });
+};
+
+// Called when the winner
 const onWinDetected = function(winningMember) {
   console.info('Winner detected', winningMember);
 };
-
-r.connect({host: cfg.db.host, port: cfg.db.port, db: cfg.db.name}).then(function(c) {
-  // Check if there is already a winner
-  r.table('votingMembers').filter(
-    r.row('winner').eq(true)
-  ).run(c, function(err, cursor) {
-    if (err) {
-      return console.error('Could not determine if there is already a winner on start up');
-    }
-    cursor.toArray(function(err, results) {
-      if (err) {
-        return console.error('Could not determine if there is already a winner on start up');
-      }
-      if (results.length) {
-        console.info('There is already a winner, not watching for another');
-      } else {
-        r.table('votingMembers').filter(
-          r.row('score').ge(cfg.game.winningPoints)
-        ).run(c, function(err, cursor) {
-          if (err) {
-            return console.error('Could not determine if there is already a winner on start up');
-          }
-          cursor.toArray(function(err, results) {
-            if (err) {
-              return console.error('Could not determine if there is already a winner on start up');
-            }
-            if (results.length) {
-              onWinDetected(results[0]);
-            } else {
-              // Nobody has won yet, start watching for changes
-              // TODO
-              r.table('votingMembers').filter(r.row('score').ge(cfg.game.winningPoints)).changes().run(c).then(function(cursor){
-                console.log('Listening for changes to votingMembers');
-                cursor.each(function(err, votingMember) {
-                  onWinDetected(winningMember);
-                });
-              });
-            }
-          });
-        });
-      }
-    });
-
-  });
-
-});

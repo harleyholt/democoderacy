@@ -1,7 +1,12 @@
 {
   "app": {
+    "host": "localhost",
     "port": 8008,
-    "environment": "local"
+    "environment": "local",
+    "hotReload": {
+      "host": "localhost",
+      "port":8009
+    }
   },
   "db": {
     "name": "democoderacy",
