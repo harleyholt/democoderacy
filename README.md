@@ -2,11 +2,18 @@
 ## The Worlds Nerdliest Game
 
 ### What?
-Democoderacy (alternately, Nomicode), is a game/experiment of collaberative software development inspired by [Nomic](https://en.wikipedia.org/wiki/Nomic).
+Democoderacy, is a game/experiment of collaberative software development inspired by [Nomic](https://en.wikipedia.org/wiki/Nomic).
 
 In short, Nomic is a game where every rule is changable. Every turn proposes new rules or rule changes. Ever rule is voted into or out of existence by the players.
 
 Democoderacy is the same idea in the form of this GitHub repo. The code in the repo is the game. All of it is changable (even this README), but only if a majority of the contributors agree to the change.
+
+Rules:
+
+1. Any pull requests submitted to this repo are voted on by any members who have previously contributed to the project.
+2. After a period of one week or when half of the contibutors (defined as exactly 50%) have voted in favor of the pull request, the pull request is accepted or closed based on the number of positive votes.
+3. If 50% of votes are in favor of the pull request, the pull request is accepted.
+4. If less than 50% of votes are in favor of the pull request, it is closed without merge.
 
 To start, the code implements the following:
 
